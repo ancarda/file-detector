@@ -45,6 +45,11 @@ final class MimeTest extends TestCase
         $this->assertFileHasMimeType('sample.xml', 'text/xml');
     }
 
+    public function testWebp()
+    {
+        $this->assertFileHasMimeType('sample.webp', 'image/webp');
+    }
+
     private function assertFileHasMimeType(string $path, string $filetype)
     {
         $stream = fopen(__DIR__ . '/files/' . $path, 'r');

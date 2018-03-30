@@ -61,6 +61,10 @@ final class Detector
 
         // More complicated types have non-zero offset for their magic bytes
         // or variable bytes to detect (examples: tar, avi, wav)
+        $next8 = fread($fh, 8);
+        if ($this->take($next8, 4) === [87, 69, 66, 80]) {
+            return 'image/webp';
+        }
 
         // We're going to have to guess if it's binary or not.
         $binary = array_merge(range(0, 8), range(11, 12), range(14, 31), [0x7F]);
