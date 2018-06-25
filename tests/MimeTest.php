@@ -78,7 +78,7 @@ final class MimeTest extends TestCase
     {
         $stream = fopen('php://memory', 'w');
         fwrite($stream, random_bytes(100));
-        fread($stream, 100);
+        fread($stream, 1);
         return $stream;
     }
 }

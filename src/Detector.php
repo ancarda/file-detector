@@ -90,7 +90,7 @@ final class Detector
         $out = [];
         for ($i = 0; $i < $len; $i++) {
             if (empty($bstr[$i])) {
-                throw new UnreadableStreamException('The stream in offset ' . $i . ' cannot be readable.');
+                throw new UnreadableStreamException('The stream in offset ' . $i . ' is not readable.');
             }
 
             $out[] = ord($bstr[$i]);

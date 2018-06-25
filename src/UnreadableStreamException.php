@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ancarda\File;
 
-use Exception;
+use InvalidArgumentException;
 
-class UnreadableStreamException extends Exception
+class UnreadableStreamException extends InvalidArgumentException
 {
 }
