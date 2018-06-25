@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Test;
+namespace Ancarda\File\Test;
 
-use \Ancarda\File\Detector;
-use \PHPUnit\Framework\TestCase;
+use Ancarda\File\Detector;
+use Ancarda\File\UnreadableStreamException;
+use PHPUnit\Framework\TestCase;
 
 final class MimeTest extends TestCase
 {
@@ -13,7 +14,7 @@ final class MimeTest extends TestCase
 
     public function setUp()
     {
-        $this->detector = new \Ancarda\File\Detector;
+        $this->detector = new Detector;
     }
 
     public function testText()
@@ -22,6 +23,13 @@ final class MimeTest extends TestCase
         $mime = $this->detector->determineMimeType($stream);
         $this->assertEquals('text/plain; charset=utf-8', $mime);
         fclose($stream);
+    }
+
+    public function testTextThrowsUnreadableStreamException()
+    {
+        $stream = $this->invalidStreamFromString('this is some text');
+        $this->expectException(UnreadableStreamException::class);
+        $this->detector->determineMimeType($stream);
     }
 
     public function testJpeg()
@@ -63,6 +71,14 @@ final class MimeTest extends TestCase
         $stream = fopen('php://memory', 'rw');
         fwrite($stream, $s);
         rewind($stream);
+        return $stream;
+    }
+
+    private function invalidStreamFromString(string $s)
+    {
+        $stream = fopen('php://memory', 'w');
+        fwrite($stream, random_bytes(100));
+        fread($stream, 1);
         return $stream;
     }
 }

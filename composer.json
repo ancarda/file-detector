@@ -31,5 +31,10 @@
         "psr-4": {
             "Ancarda\\File\\": "src"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ancarda\\File\\Test\\": "tests"
+        }
     }
 }
