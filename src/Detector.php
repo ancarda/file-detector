@@ -79,11 +79,12 @@ final class Detector
         $position = $file->ftell();
         $move = $file->fseek($start, \SEEK_SET);
         $read = $file->fread($length);
-        if ($position === false || $move === -1 || $read === false) {
-            throw new \Exception('Could not seek through and read from the file.');
+        // Reading failed, or the reading start position was uncertain.
+        if ($read === false || $move === -1 && $position !== $start) {
+            throw new \Exception('Could not read specified bytes from the file.');
         }
-        $back = $file->fseek($position, \SEEK_SET);
-        if ($back === -1) {
+        // The original position is unknown or the position could not be set to it.
+        if ($position === false || $file->fseek($position, \SEEK_SET) === -1) {
             throw new \Exception('Could not reset the cursor.');
         }
         return $read;
