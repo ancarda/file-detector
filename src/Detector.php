@@ -5,35 +5,21 @@ declare(strict_types=1);
 namespace Ancarda\File;
 
 /**
- * Detector contains routines for working on partial streams.
+ * Detector contains routines for working with file objects.
  */
 final class Detector
 {
     /**
      * Makes an educated guess of the most appropriate MIME type for a
-     * given stream.
+     * given file object.
      *
-     * @param resource $fh Stream resource.
-     * @throws \InvalidArgumentException Resource isn't a stream.
+     * @param \SplFileObject $file File object.
      * @return string MIME type or null if it can't be determined.
      */
-    public function determineMimeType($fh): string
+    public function determineMimeType(\SplFileObject $file): string
     {
-        // $fh needs to be a resource.
-        if (gettype($fh) !== 'resource') {
-            throw new \InvalidArgumentException('Must be a resource of stream');
-        }
-
-        // Even though we asked for a resource, we need a stream,
-        // specifically.
-        if (get_resource_type($fh) !== 'stream') {
-            // FIXME(ancarda): Replace with ResourceNotStreamEx.
-            throw new \InvalidArgumentException('Must be stream.');
-        }
-
-        // FIXME(ancarda): Make a note of where the pointer was so it
-        // can be reset back before the function returns.
-        $initial = fread($fh, 8);
+        /** @var string $initial The first 8 bytes of the file. */
+        $initial = $this->read($file, 0, 8);
 
         // Simple types that have their magic bytes at offset 0
         $grimoire = [
@@ -61,7 +47,7 @@ final class Detector
 
         // More complicated types have non-zero offset for their magic bytes
         // or variable bytes to detect (examples: tar, avi, wav)
-        $next8 = fread($fh, 8);
+        $next8 = $this->read($file, 8, 16);
         if ($this->take($next8, 4) === [87, 69, 66, 80]) {
             return 'image/webp';
         }
@@ -76,6 +62,31 @@ final class Detector
 
         // If it's not binary, and not a detected type, let's treat it as text.
         return 'text/plain; charset=utf-8';
+    }
+
+    /**
+     * Read bytes from a file, leaving the object unchanged.
+     *
+     * @param \SplFileObject $file File object to read.
+     * @param int $start Byte offset to start reading from.
+     * @param int $length Number of bytes to read.
+     * @throws \Exception When seeking or reading failed.
+     * @throws \Exception When the cursor could not be reset.
+     * @return string Extracted bytes.
+     */
+    private function read(\SplFileObject $file, int $start, int $length): string
+    {
+        $position = $file->ftell();
+        $move = $file->fseek($start, \SEEK_SET);
+        $read = $file->fread($length);
+        if ($position === false || $move === -1 || $read === false) {
+            throw new \Exception('Could not seek through and read from the file.');
+        }
+        $back = $file->fseek($position, \SEEK_SET);
+        if ($back === -1) {
+            throw new \Exception('Could not reset the cursor.');
+        }
+        return $read;
     }
 
     /**

@@ -18,10 +18,9 @@ final class MimeTest extends TestCase
 
     public function testText()
     {
-        $stream = $this->streamFromString('this is some text');
-        $mime = $this->detector->determineMimeType($stream);
+        $file = $this->fileFromString('this is some text');
+        $mime = $this->detector->determineMimeType($file);
         $this->assertEquals('text/plain; charset=utf-8', $mime);
-        fclose($stream);
     }
 
     public function testJpeg()
@@ -52,17 +51,16 @@ final class MimeTest extends TestCase
 
     private function assertFileHasMimeType(string $path, string $filetype)
     {
-        $stream = fopen(__DIR__ . '/files/' . $path, 'r');
-        $mime = $this->detector->determineMimeType($stream);
+        $file = new \SplFileObject(__DIR__ . '/files/' . $path, 'r');
+        $mime = $this->detector->determineMimeType($file);
         $this->assertEquals($filetype, $mime);
-        fclose($stream);
     }
 
-    private function streamFromString(string $s)
+    private function fileFromString(string $s)
     {
-        $stream = fopen('php://memory', 'rw');
-        fwrite($stream, $s);
-        rewind($stream);
-        return $stream;
+        $file = new \SplTempFileObject();
+        $file->fwrite($s);
+        $file->rewind();
+        return $file;
     }
 }
