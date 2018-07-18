@@ -49,6 +49,11 @@ final class MimeTest extends TestCase
         $this->assertFileHasMimeType('sample.webp', 'image/webp');
     }
 
+    public function testFlac()
+    {
+        $this->assertFileHasMimeType('sample.flac', 'audio/flac');
+    }
+
     private function assertFileHasMimeType(string $path, string $filetype)
     {
         $file = new \SplFileObject(__DIR__ . '/files/' . $path, 'r');
