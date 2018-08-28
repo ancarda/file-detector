@@ -54,6 +54,14 @@ final class MimeTest extends TestCase
         $this->assertSame([16, 16], $this->detector->determineDimensions(__DIR__ . '/files/sample.png'));
     }
 
+    public function testDetermineDimensionsWithInvalidImagePath()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('File path invalid_image_file is not existed');
+
+        $this->detector->determineDimensions('invalid_image_file');
+    }
+
     public function testFlac()
     {
         $this->assertFileHasMimeType('sample.flac', 'audio/flac');
