@@ -49,6 +49,11 @@ final class MimeTest extends TestCase
         $this->assertFileHasMimeType('sample.webp', 'image/webp');
     }
 
+    public function testDetermineDimensions()
+    {
+        $this->assertSame([16, 16], $this->detector->determineDimensions(__DIR__ . '/files/sample.png'));
+    }
+
     public function testFlac()
     {
         $this->assertFileHasMimeType('sample.flac', 'audio/flac');

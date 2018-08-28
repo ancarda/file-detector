@@ -65,6 +65,21 @@ final class Detector
     }
 
     /**
+     * Read width amd height from a image file
+     *
+     * @param string $filePath
+     */
+    public function determineDimensions(string $filePath): array
+    {
+        if (!file_exists($filePath)) {
+            throw new \InvalidArgumentException('File path ' . $filePath . ' is not existed');
+        }
+        list($width, $height) = getimagesize($filePath);
+
+        return [$width, $height];
+    }
+
+    /**
      * Read bytes from a file, leaving the object unchanged.
      *
      * @param \SplFileObject $file File object to read.
