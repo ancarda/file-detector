@@ -51,15 +51,19 @@ final class MimeTest extends TestCase
 
     public function testDetermineDimensions()
     {
-        $this->assertSame([16, 16], $this->detector->determineDimensions(__DIR__ . '/files/sample.png'));
+        $file = new \SplFileObject(__DIR__ . '/files/sample.png', 'r');
+
+        $this->assertSame([16, 16], $this->detector->determineDimensions($file));
     }
 
     public function testDetermineDimensionsWithInvalidImagePath()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('File path invalid_image_file is not existed');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('failed to open stream: No such file or directory');
 
-        $this->detector->determineDimensions('invalid_image_file');
+        $file = new \SplFileObject('invalid_path.png', 'r');
+
+        $this->assertSame([0, 0], $this->detector->determineDimensions($file));
     }
 
     public function testFlac()

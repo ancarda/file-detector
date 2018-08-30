@@ -67,19 +67,26 @@ final class Detector
     /**
      * Read width and height from a image file.
      *
-     * @param string $filePath
+     * @param \SplFileObject $file File object
      * @return array [$width, $height]
      * @throws \InvalidArgumentException Unreadable SplFileInfo
      */
-    public function determineDimensions(string $filePath): array
+    public function determineDimensions(\SplFileObject $file): array
     {
-        $stream = new \SplFileInfo($filePath);
-        if (!$stream->isReadable()) {
-            throw new \InvalidArgumentException('File path ' . $filePath . ' is not existed');
-        }
-        list($width, $height) = getimagesize($filePath);
+        if (false !== $path = $file->getRealPath()) {
+            $info = getimagesize($path);
 
-        return [$width, $height];
+            return [$info[0], $info[1]];
+        }
+
+        $file->rewind();
+        $buffer = '';
+        while (false === $file->eof()) {
+            $buffer .= $file->fread(512);
+        }
+        $info = getimagesizefromstring($buffer);
+
+        return [$info[0], $info[1]];
     }
 
     /**
