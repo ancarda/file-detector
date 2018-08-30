@@ -70,11 +70,16 @@ final class Detector
      * @param \SplFileObject $file File object
      * @return array [$width, $height]
      * @throws \InvalidArgumentException Unreadable SplFileInfo
+     * @throws \RuntimeException SplFileObject $file object is failed to rewind
      */
     public function determineDimensions(\SplFileObject $file): array
     {
         if (false !== $path = $file->getRealPath()) {
             $info = getimagesize($path);
+
+            if (false === $info) {
+                throw new \InvalidArgumentException('Failed to get the image size. Given path is ' . $path . '.');
+            }
 
             return [$info[0], $info[1]];
         }
@@ -84,7 +89,12 @@ final class Detector
         while (false === $file->eof()) {
             $buffer .= $file->fread(512);
         }
+
         $info = getimagesizefromstring($buffer);
+
+        if (false === $info) {
+            throw new \InvalidArgumentException('Failed to get the image size from string.');
+        }
 
         return [$info[0], $info[1]];
     }
