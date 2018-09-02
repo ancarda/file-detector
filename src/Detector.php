@@ -80,14 +80,20 @@ final class Detector
             if (false === $info) {
                 throw new \InvalidArgumentException('Failed to get the image size. Given path is ' . $path . '.');
             }
-
-            return [$info[0], $info[1]];
         }
 
-        $file->rewind();
+        $position = $file->ftell();
+        if (0 !== $position) {
+            $file->rewind();
+        }
+
         $buffer = '';
         while (false === $file->eof()) {
             $buffer .= $file->fread(512);
+        }
+
+        if (false === $position || -1 === $file->fseek($position, \SEEK_SET)) {
+            throw new \Exception('Could not reset the cursor.');
         }
 
         $info = getimagesizefromstring($buffer);
