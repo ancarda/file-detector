@@ -56,6 +56,13 @@ final class MimeTest extends TestCase
         $this->assertSame([16, 16], $this->detector->determineDimensions($file));
     }
 
+    public function testDetermineDimensionsWithRectangleImage()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample2.jpg', 'r');
+
+        $this->assertSame([3, 7], $this->detector->determineDimensions($file));
+    }
+
     public function testDetermineDimensionsWithInvalidFileType()
     {
         $file = new \SplFileObject(__DIR__ . '/files/sample.xml', 'r');
