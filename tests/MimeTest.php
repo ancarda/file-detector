@@ -75,7 +75,6 @@ final class MimeTest extends TestCase
     public function testDetermineDimensionsWithNonZeroPosition()
     {
         $file = new \SplFileObject(__DIR__ . '/files/sample.jpg', 'r');
-        $file->ftell();
         $file->fread(512);
 
         $this->assertEquals([16, 16], $this->detector->determineDimensions($file));
