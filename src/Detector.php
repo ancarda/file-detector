@@ -65,6 +65,47 @@ final class Detector
     }
 
     /**
+     * Read width and height from a image file.
+     *
+     * @param \SplFileObject $file File object
+     * @return array [$width, $height]
+     * @throws \InvalidArgumentException Unreadable SplFileInfo
+     * @throws \RuntimeException SplFileObject $file object is failed to rewind
+     */
+    public function determineDimensions(\SplFileObject $file): array
+    {
+        if (false !== $path = $file->getRealPath()) {
+            $info = getimagesize($path);
+
+            if (false === $info) {
+                throw new \InvalidArgumentException('Failed to get the image size. Given path is ' . $path . '.');
+            }
+        }
+
+        $position = $file->ftell();
+        if (0 !== $position) {
+            $file->rewind();
+        }
+
+        $buffer = '';
+        while (false === $file->eof()) {
+            $buffer .= $file->fread(512);
+        }
+
+        if (false === $position || -1 === $file->fseek($position, \SEEK_SET)) {
+            throw new \Exception('Could not reset the cursor.');
+        }
+
+        $info = getimagesizefromstring($buffer);
+
+        if (false === $info) {
+            throw new \InvalidArgumentException('Failed to get the image size from string.');
+        }
+
+        return [$info[0], $info[1]];
+    }
+
+    /**
      * Read bytes from a file, leaving the object unchanged.
      *
      * @param \SplFileObject $file File object to read.

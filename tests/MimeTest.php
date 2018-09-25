@@ -49,6 +49,37 @@ final class MimeTest extends TestCase
         $this->assertFileHasMimeType('sample.webp', 'image/webp');
     }
 
+    public function testDetermineDimensions()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample.png', 'r');
+
+        $this->assertSame([16, 16], $this->detector->determineDimensions($file));
+    }
+
+    public function testDetermineDimensionsWithRectangleImage()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample2.jpg', 'r');
+
+        $this->assertSame([3, 7], $this->detector->determineDimensions($file));
+    }
+
+    public function testDetermineDimensionsWithInvalidFileType()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample.xml', 'r');
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->detector->determineDimensions($file);
+    }
+
+    public function testDetermineDimensionsWithNonZeroPosition()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample.jpg', 'r');
+        $file->fread(512);
+
+        $this->assertEquals([16, 16], $this->detector->determineDimensions($file));
+    }
+
     public function testFlac()
     {
         $this->assertFileHasMimeType('sample.flac', 'audio/flac');
