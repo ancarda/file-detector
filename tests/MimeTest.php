@@ -54,6 +54,53 @@ final class MimeTest extends TestCase
         $this->assertFileHasMimeType('sample.flac', 'audio/flac');
     }
 
+    public function testEmptyFile()
+    {
+        $this->detector->determineMimeType(new \SplTempFileObject());
+    }
+
+    public function testFromNonZeroCursorPosition()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample.jpg', 'r');
+        $file->fseek(16, \SEEK_SET);
+
+        $this->assertEquals('image/jpg', $this->detector->determineMimeType($file));
+        $this->assertEquals(16, $file->ftell()); // Make sure cursor did not move.
+    }
+
+    public function testNonSeekable()
+    {
+        $file = $this->getMockBuilder(\SplFileObject::class)
+            ->setConstructorArgs([__DIR__ . '/files/sample.jpg', 'r'])
+            ->setMethods(['fseek'])
+            ->getMock();
+        $file->method('fseek')
+            ->will($this->returnValue(-1));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Could not reset the cursor.');
+        $this->detector->determineMimeType($file);
+    }
+
+    public function testFromNonZeroCursorAndNonSeekablePosition()
+    {
+        $file = new \SplFileObject(__DIR__ . '/files/sample.jpg', 'r');
+        $file->fseek(16, \SEEK_SET);
+
+        $file = $this->getMockBuilder(\SplFileObject::class)
+            ->setConstructorArgs([__DIR__ . '/files/sample.jpg', 'r'])
+            ->setMethods(['fseek', 'ftell'])
+            ->getMock();
+        $file->method('fseek')
+            ->will($this->returnValue(-1));
+        $file->method('ftell')
+            ->will($this->returnValue(16)); // Report to not be at 0, will try to fseek to 0.
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Could not read specified bytes from the file.');
+        $this->detector->determineMimeType($file);
+    }
+
     private function assertFileHasMimeType(string $path, string $filetype)
     {
         $file = new \SplFileObject(__DIR__ . '/files/' . $path, 'r');
