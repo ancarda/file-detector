@@ -141,6 +141,7 @@ final class Detector
     private function take(string $bstr, int $len): array
     {
         $out = [];
+        $len = min($len, strlen($bstr));
         for ($i = 0; $i < $len; $i++) {
             $out[] = ord($bstr[$i]);
         }

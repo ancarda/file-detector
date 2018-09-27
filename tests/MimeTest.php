@@ -56,6 +56,8 @@ final class MimeTest extends TestCase
 
     public function testEmptyFile()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Could not read specified bytes from the file.');
         $this->detector->determineMimeType(new \SplTempFileObject());
     }
 
